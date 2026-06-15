@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About QRPay.so</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#0A0F1E;
+  --muted:#64748B;
+  --line:#E2E8F0;
+  --surface:#F8FAFF;
+  --evc:#00C896;
+  --edahab:#FF6B35;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--surface);
+  color:var(--ink);
+  line-height:1.7;
+}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#00C896,#027f60);
+  color:#fff;
+  text-align:center;
+  padding:90px 20px;
+}
+
+.hero h1{
+  font-size:42px;
+  font-weight:800;
+  margin-bottom:10px;
+}
+
+.hero p{
+  max-width:700px;
+  margin:auto;
+  font-size:16px;
+  opacity:.85;
+}
+
+/* CONTAINER */
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:60px 20px;
+}
+
+/* CARD */
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.04);
+}
+
+.card h2{
+  font-size:22px;
+  margin-bottom:10px;
+}
+
+.card p{
+  font-size:15px;
+  color:var(--muted);
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-top:15px;
+}
+
+.small-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px;
+}
+
+/* HIGHLIGHT */
+.highlight{
+  background:#0A0F1E;
+  color:#fff;
+  text-align:center;
+  padding:60px 20px;
+}
+
+.highlight p{
+  max-width:750px;
+  margin:auto;
+  opacity:.85;
+}
+
+/* FOOTER */
+footer{
+  text-align:center;
+  padding:30px 20px;
+  border-top:1px solid var(--line);
+  background:#fff;
+  font-size:13px;
+  color:var(--muted);
+}
+
+a{
+  color:var(--evc);
+  text-decoration:none;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>About QRPay.so</h1>
+  <p>Simple, fast, and secure QR payments for Somalia’s mobile money economy.</p>
+</section>
+
+<!-- CONTENT -->
+<div class="container">
+
+  <div class="card">
+    <h2>Our Story</h2>
+    <p>
+      QRPay.so was created to solve a real problem in Somalia’s digital economy.
+      Today, most payments are done via mobile money (EVC Plus & eDahab), but users still manually type numbers for every transaction.
+    </p>
+    <br>
+    <p>
+      We built QRPay.so to remove that friction — turning payment details into a simple QR code that anyone can scan instantly.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>The Problem</h2>
+    <div class="grid">
+
+      <div class="small-card">Slow manual number entry</div>
+      <div class="small-card">Typing errors in payments</div>
+      <div class="small-card">Poor customer experience</div>
+      <div class="small-card">Lost business opportunities</div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Who It’s For</h2>
+    <div class="grid">
+
+      <div class="small-card">Small Businesses</div>
+      <div class="small-card">Street Vendors</div>
+      <div class="small-card">Mosques & NGOs</div>
+      <div class="small-card">Schools</div>
+      <div class="small-card">Freelancers</div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- VISION -->
+<section class="highlight">
+  <h2>Our Vision</h2>
+  <p>
+    To make payments in Somalia as simple as scanning a QR code — faster, safer, and accessible for everyone.
+  </p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong>QRPay.so</strong> — Mobile payments made simple</p>
+  <p style="margin-top:8px;">
+    <a href="index.html">← Back to Home</a>
+  </p>
+  <p style="margin-top:10px;">© 2026 QRPay.so</p>
+</footer>
+
+</body>
+</html>

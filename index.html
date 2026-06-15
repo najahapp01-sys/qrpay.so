@@ -155,7 +155,7 @@ body {
 
 /* ── BRAND SWITCHER ──────────────────────────────── */
 .switcher-wrap {
-  display: flex; justify-content: center; margin-bottom: 40px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 40px;
 }
 .switcher {
   display: inline-flex;
@@ -186,6 +186,34 @@ body {
 .sw-btn.active.evc { background: var(--evc); }
 .sw-btn.active.edahab { background: var(--edahab); }
 .sw-btn:not(.active):hover { color: var(--ink); background: var(--surface); }
+
+/* ── FUNCTION SELECTOR (TABS) ────────────────────── */
+.func-container {
+  display: flex;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px;
+  width: 100%;
+  max-width: 580px;
+  box-shadow: 0 2px 8px rgba(10,15,30,0.04);
+}
+.func-btn {
+  flex: 1;
+  text-align: center;
+  padding: 10px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: none; cursor: pointer;
+  border-radius: calc(var(--radius) - 4px);
+  transition: all 0.2s ease;
+}
+.func-btn.active {
+  color: var(--white);
+  background: var(--accent);
+}
 
 /* ── MAIN GRID ───────────────────────────────────── */
 .main {
@@ -538,7 +566,6 @@ footer {
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="nav">
   <div class="nav-brand">
     <div class="nav-logo">
@@ -550,7 +577,6 @@ footer {
     <div>
       <div class="nav-title">QR Pay.so</div>
     </div>
-    
   </div>
   <div class="nav-right">
     <div class="nav-pill">
@@ -559,7 +585,6 @@ footer {
   </div>
 </nav>
 
-<!-- HERO -->
 <div class="hero">
   <div class="hero-eyebrow">
     <span class="hero-eyebrow-line" id="eyebrow-line"></span>
@@ -569,7 +594,6 @@ footer {
   <h1>Generate your<br><em id="hero-em">EVC Plus</em> payment<br>QR in seconds</h1>
   <p class="hero-sub">Shops, mosques, NGOs, and freelancers — print and display. Customers scan and pay instantly. No app needed.</p>
 
-  <!-- BRAND SWITCHER -->
   <div class="switcher-wrap">
     <div class="switcher">
       <button class="sw-btn evc active" id="sw-evc" onclick="switchBrand('evc')">
@@ -581,13 +605,17 @@ footer {
         eDahab
       </button>
     </div>
+
+    <div class="func-container">
+      <button class="func-btn active" id="mode-pay-fixed" onclick="switchMode('pay-fixed')">Mobile (Fixed Amount)</button>
+      <button class="func-btn" id="mode-merchant" onclick="switchMode('merchant')">Merchant Pay</button>
+      <button class="func-btn" id="mode-pay-open" onclick="switchMode('pay-open')">Mobile (Manual Amount)</button>
+    </div>
   </div>
 </div>
 
-<!-- MAIN GRID -->
 <main class="main">
 
-  <!-- LEFT: FORM -->
   <div>
     <div class="card">
       <div class="card-header">
@@ -601,7 +629,6 @@ footer {
       </div>
       <div class="card-body">
 
-        <!-- Name -->
         <div class="field">
           <div class="field-label">Gali Magaca <span style="font-size:11px;color:var(--muted-2);text-transform:none;font-weight:400;letter-spacing:0">(optional)</span></div>
           <div class="input-wrap">
@@ -610,31 +637,28 @@ footer {
           </div>
         </div>
 
-        <!-- Phone -->
         <div class="field">
           <div class="field-label" id="phone-label">
             EVC number <span class="req">*</span>
           </div>
           <div class="input-wrap">
             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.4 2 2 0 0 1 3 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span class="phone-prefix">+252</span>
+            <span class="phone-prefix" id="phone-prefix-element">+252</span>
             <input type="text" id="inp-phone" class="phone-input-padded" placeholder="61 5 009900" maxlength="12" inputmode="numeric">
           </div>
           <div class="field-error" id="err-phone">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Enter a valid Somali number (9–12 digits, numbers only)
+            <span id="err-phone-text">Enter a valid Somali number (9–12 digits, numbers only)</span>
           </div>
         </div>
 
-        <!-- Amount -->
-        <div class="field">
+        <div class="field" id="amount-field-container">
           <div class="field-label">Amount (USD) <span class="req">*</span></div>
           <div class="presets-grid">
             <button class="preset active" onclick="selectPreset(this,'0.10')">$0.10</button>
             <button class="preset" onclick="selectPreset(this,'0.25')">$0.25</button>
             <button class="preset" onclick="selectPreset(this,'0.50')">$0.50</button>
             <button class="preset" onclick="selectPreset(this,'0.75')">$0.75</button>
-            
             <button class="preset other" onclick="selectCustom(this)">Other amount…</button>
           </div>
           <div class="custom-input-wrap" id="custom-wrap">
@@ -657,7 +681,6 @@ footer {
       </div>
     </div>
 
-    <!-- HOW TO PAY -->
     <div class="how-card" style="margin-top: 20px;">
       <div class="how-card-title">How it works</div>
       <div class="how-step">
@@ -684,9 +707,7 @@ footer {
     </div>
   </div>
 
-  <!-- RIGHT: PREVIEW -->
   <div>
-    <!-- Empty state -->
     <div class="card" id="empty-state">
       <div style="padding: 60px 24px; text-align: center;">
         <div style="width:72px;height:72px;background:var(--surface);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
@@ -697,7 +718,6 @@ footer {
       </div>
     </div>
 
-    <!-- Preview (hidden until generated) -->
     <div class="card preview-card" id="preview-card">
       <div class="preview-top">
         <div class="preview-brand-tag" id="prev-brand-tag">Fadhlan Iska Hubi</div>
@@ -708,12 +728,12 @@ footer {
         <div class="qr-frame">
           <div id="qr-target"></div>
         </div>
-        <div class="amount-row">
-          <span class="amount-currency">USD</span>
+        <div class="amount-row" id="prev-amount-container">
+          <span class="amount-currency" id="prev-currency-label">USD</span>
           <span class="amount-value" id="prev-amount-whole">0</span>
           <span class="amount-cents" id="prev-amount-cents">.00</span>
         </div>
-        <div class="amount-label">Payment amount</div>
+        <div class="amount-label" id="prev-amount-sublabel">Payment amount</div>
         <div class="ussd-row">
           <span class="ussd-code" id="prev-ussd">–</span>
           <button class="copy-btn" onclick="copyUssd()" title="Copy USSD code">
@@ -736,11 +756,10 @@ footer {
 
 </main>
 
-<!-- FOOTER -->
 <footer>
   <div class="visitor-chip">
     <span class="live-dot"></span>
-    <span id="visitor-text"><span class="visitor-count-num" id="visitor-num">–</span> total visitors</span>
+    <span id="visitor-text"><span class="visitor-count-num" id="visitor-num">Loading...</span> total visitors</span>
   </div>
   <div class="footer-links">
     <div class="footer-badge">
@@ -756,10 +775,9 @@ footer {
       Privacy first
     </div>
   </div>
-  <div class="footer-copy">QR Pay Generator &copy; 2025 &mdash; Somalia mobile payments made simple</div>
+  <div class="footer-copy">QR Pay Generator &copy; 2026 &mdash; Somalia mobile payments made simple</div>
 </footer>
 
-<!-- TOAST -->
 <div class="toast" id="toast">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
   <span id="toast-msg">Copied!</span>
@@ -768,34 +786,85 @@ footer {
 <script>
 /* ── STATE ─────────────────────────────────────── */
 let brand = 'evc';
+let currentMode = 'pay-fixed'; // 'pay-fixed', 'merchant', 'pay-open'
 let presetVal = '0.10';
 let isCustom = false;
-let qrDataUrl = null;
+let qrCodeInstance = null;
 let lastPayload = null;
+
+
+/* ── INITIALIZE PAGE ────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  updateUIStrings();
+  loadVisitorCount();
+});
 
 /* ── BRAND SWITCH ──────────────────────────────── */
 function switchBrand(b) {
   brand = b;
-  const isEVC = b === 'evc';
+  updateUIStrings();
+}
 
-  // CSS vars
+/* ── MODE SWITCH ───────────────────────────────── */
+function switchMode(mode) {
+  currentMode = mode;
+  
+  // Highlight operational tab
+  document.querySelectorAll('.func-btn').forEach(btn => btn.classList.remove('active'));
+  if(mode === 'pay-fixed') document.getElementById('mode-pay-fixed').classList.add('active');
+  if(mode === 'merchant') document.getElementById('mode-merchant').classList.add('active');
+  if(mode === 'pay-open') document.getElementById('mode-pay-open').classList.add('active');
+
+  // Toggle amount input configurations
+  const amtContainer = document.getElementById('amount-field-container');
+  if (currentMode === 'pay-fixed' || currentMode === 'merchant') {
+    amtContainer.style.display = 'block';
+  } else {
+    amtContainer.style.display = 'none';
+  }
+
+  updateUIStrings();
+}
+
+/* ── REFACTOR DYNAMIC STRINGS ────────────────── */
+function updateUIStrings() {
+  const isEVC = brand === 'evc';
+  
+  // CSS styling tokens
   document.documentElement.style.setProperty('--accent',        isEVC ? 'var(--evc)'        : 'var(--edahab)');
   document.documentElement.style.setProperty('--accent-dark',   isEVC ? 'var(--evc-dark)'   : 'var(--edahab-dark)');
   document.documentElement.style.setProperty('--accent-glow',   isEVC ? 'var(--evc-glow)'   : 'var(--edahab-glow)');
-  document.documentElement.style.setProperty('--accent-subtle', isEVC ? 'var(--evc-subtle)'  : 'var(--edahab-subtle)');
+  document.documentElement.style.setProperty('--accent-subtle', isEVC ? 'var(--evc-subtle)' : 'var(--edahab-subtle)');
 
-  // switcher buttons
   document.getElementById('sw-evc').className    = 'sw-btn evc'    + (isEVC ? ' active' : '');
   document.getElementById('sw-edahab').className = 'sw-btn edahab' + (!isEVC ? ' active' : '');
-
-  // labels
-  document.getElementById('phone-label').innerHTML = (isEVC ? 'EVC number' : 'eDahab number') + ' <span class="req">*</span>';
-  document.getElementById('inp-phone').placeholder = isEVC ? '61 5 009900' : '62 5 009900';
   document.getElementById('hero-em').textContent = isEVC ? 'EVC Plus' : 'eDahab';
-  document.getElementById('step3-desc').textContent = `They press Call and enter their ${isEVC ? 'EVC' : 'eDahab'} PIN. Payment done.`;
+
+  const phoneLabel = document.getElementById('phone-label');
+  const phoneInput = document.getElementById('inp-phone');
+  const prefixEl = document.getElementById('phone-prefix-element');
+
+  if (currentMode === 'merchant') {
+    phoneLabel.innerHTML = (isEVC ? 'EVC Merchant Number' : 'eDahab Merchant Number') + ' <span class="req">*</span>';
+    phoneInput.placeholder = '615545';
+    prefixEl.style.display = 'none';
+    phoneInput.className = '';
+  } else {
+    phoneLabel.innerHTML = (isEVC ? 'EVC number' : 'eDahab number') + ' <span class="req">*</span>';
+    phoneInput.placeholder = isEVC ? '61 5 009900' : '62 5 009900';
+    prefixEl.style.display = 'block';
+    phoneInput.className = 'phone-input-padded';
+  }
+
+  // Adjust instruction manual panel
+  let stepsText = `They press Call and enter their ${isEVC ? 'EVC' : 'eDahab'} PIN. Payment done.`;
+  if (currentMode === 'pay-open') {
+    stepsText = `They point their camera, enter their chosen payment amount manually on their phone dashboard when prompted, and enter their PIN.`;
+  }
+  document.getElementById('step3-desc').textContent = stepsText;
 }
 
-/* ── AMOUNT ────────────────────────────────────── */
+/* ── AMOUNT MANAGEMENT ─────────────────────────── */
 function selectPreset(el, val) {
   isCustom = false; presetVal = val;
   document.getElementById('custom-wrap').className = 'custom-input-wrap';
@@ -810,6 +879,7 @@ function selectCustom(el) {
   document.getElementById('inp-custom').focus();
 }
 function getAmount() {
+  if (currentMode === 'pay-open') return 0;
   if (isCustom) {
     const v = parseFloat(document.getElementById('inp-custom').value);
     return (isNaN(v) || v <= 0) ? null : v;
@@ -822,9 +892,9 @@ function sanitize(s) {
   return s.replace(/[<>"'`&;]/g, '').trim();
 }
 
-/* ── GENERATE ──────────────────────────────────── */
+/* ── GENERATE OPERATIONAL LOGIC ────────────────── */
 function generate() {
-  const rawPhone = document.getElementById('inp-phone').value.trim().replace(/\D/g,'');
+  const rawInput = document.getElementById('inp-phone').value.trim().replace(/\D/g,'');
   const amount   = getAmount();
   const name     = sanitize(document.getElementById('inp-name').value || '');
 
@@ -832,187 +902,213 @@ function generate() {
   document.getElementById('err-phone').classList.remove('show');
   document.getElementById('err-amount').classList.remove('show');
 
-  if (!/^[0-9]{9,12}$/.test(rawPhone)) {
-    document.getElementById('err-phone').classList.add('show'); valid = false;
+  // Phone context checking blocks
+  if (currentMode === 'merchant') {
+    if (!/^[0-9]{4,8}$/.test(rawInput)) {
+      document.getElementById('err-phone-text').textContent = "Enter a valid merchant ID number (4-8 numeric digits)";
+      document.getElementById('err-phone').classList.add('show'); valid = false;
+    }
+  } else {
+    if (!/^[0-9]{7,12}$/.test(rawInput)) {
+      document.getElementById('err-phone-text').textContent = "Enter a valid Somali number (7–12 digits, numbers only)";
+      document.getElementById('err-phone').classList.add('show'); valid = false;
+    }
   }
-  if (!amount) {
+
+  if (currentMode !== 'pay-open' && !amount) {
     document.getElementById('err-amount').classList.add('show'); valid = false;
   }
   if (!valid) return;
 
-  const amtStr = amount.toFixed(2);
-  const [whole, cents] = amtStr.split('.');
   const isEVC = brand === 'evc';
-  const ussdCode = isEVC ? `*712*${rawPhone}*${amtStr}#` : `*862*${rawPhone}*${amtStr}#`;
-  const telUri   = `tel:${encodeURIComponent(ussdCode)}`;
+  let ussdCode = '';
+  let amtStr = amount ? amount.toFixed(2) : '0.00';
 
-  lastPayload = { name, phone: rawPhone, amount: amtStr, ussd: ussdCode, brand };
+  // Construct target operational formats
+  if (currentMode === 'pay-fixed') {
+    ussdCode = isEVC ? `*712*${rawInput}*${amtStr}#` : `*712*${rawInput}*${amtStr}#`;
+  } else if (currentMode === 'merchant') {
+    // Format required: (*789*Merchant Number*Money#)
+    ussdCode = isEVC ? `*789*${rawInput}*${amtStr}#` : `*110*${rawInput}*${amtStr}#`;
+  } else if (currentMode === 'pay-open') {
+    // Format required: (*712*MobileNumber*)
+    ussdCode = isEVC ? `*712*${rawInput}*#` : `*712*${rawInput}*`;
+  }
 
-  // Update preview header
-  document.getElementById('prev-brand-tag').textContent = isEVC ? 'EVC Plus Payment' : 'eDahab Payment';
-  document.getElementById('prev-name').textContent  = name || (isEVC ? 'EVC Payment' : 'eDahab Payment');
-  const fmt = rawPhone.length >= 9
-    ? `+252 ${rawPhone.slice(0,3)} ${rawPhone.slice(3,6)} ${rawPhone.slice(6)}`
-    : `+252 ${rawPhone}`;
-  document.getElementById('prev-phone').textContent      = fmt;
-  document.getElementById('prev-amount-whole').textContent = whole;
-  document.getElementById('prev-amount-cents').textContent = '.' + cents;
+  lastPayload = { name, targetNumber: rawInput, amount: amtStr, ussd: ussdCode, brand, mode: currentMode };
+
+  // Sync state view values
+  const prevBrandTag = document.getElementById('prev-brand-tag');
+  if(currentMode === 'merchant') {
+    prevBrandTag.textContent = isEVC ? 'EVC Merchant Pay' : 'eDahab Merchant Pay';
+  } else if(currentMode === 'pay-open') {
+    prevBrandTag.textContent = isEVC ? 'EVC Open Amount' : 'eDahab Open Amount';
+  } else {
+    prevBrandTag.textContent = isEVC ? 'EVC Plus Payment' : 'eDahab Payment';
+  }
+
+  document.getElementById('prev-name').textContent = name || (currentMode === 'merchant' ? 'Merchant Account' : 'Payee Client');
+  document.getElementById('prev-phone').textContent = (currentMode === 'merchant' ? 'ID: ' : '+252 ') + rawInput;
   document.getElementById('prev-ussd').textContent = ussdCode;
 
-  // Show preview
-  document.getElementById('empty-state').style.display = 'none';
-  document.getElementById('preview-card').className = 'card preview-card show';
+  // Amount element structural logic parsing
+  const amtContainer = document.getElementById('prev-amount-container');
+  const amtSublabel = document.getElementById('prev-amount-sublabel');
+  
+  if (currentMode === 'pay-open') {
+    amtContainer.style.display = 'none';
+    amtSublabel.textContent = "Customer enters amount manually";
+  } else {
+    amtContainer.style.display = 'flex';
+    amtSublabel.textContent = "Payment amount";
+    const [whole, cents] = amtStr.split('.');
+    document.getElementById('prev-amount-whole').textContent = whole;
+    document.getElementById('prev-amount-cents').textContent = '.' + cents;
+  }
 
-  // Generate QR
-  const target = document.getElementById('qr-target');
-  target.innerHTML = '';
-  new QRCode(target, {
+  // Draw structural canvas elements
+  document.getElementById('qr-target').innerHTML = '';
+  const telUri = `tel:${ussdCode}`; // Standard direct system call sequence string
+
+  qrCodeInstance = new QRCode(document.getElementById('qr-target'), {
     text: telUri,
-    width: 200, height: 200,
-    colorDark: '#0A0F1E',
-    colorLight: '#FFFFFF',
-    correctLevel: QRCode.CorrectLevel.M
+    width: 200,
+    height: 200,
+    colorDark : "#0A0F1E",
+    colorLight : "#FFFFFF",
+    correctLevel : QRCode.CorrectLevel.H
   });
-  setTimeout(() => {
-    const img = target.querySelector('img') || target.querySelector('canvas');
-    if (img) {
-      if (img.tagName === 'CANVAS') {
-        qrDataUrl = img.toDataURL('image/png');
-      } else {
-        qrDataUrl = img.src;
-      }
-    }
-  }, 200);
 
-  document.getElementById('preview-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  showToast('QR code generated!');
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('preview-card').style.display = 'block';
+  showToast("QR Code generated successfully!");
 }
 
-/* ── COPY USSD ─────────────────────────────────── */
+/* ── COPY TO USSD BOARDER ───────────────────────── */
 function copyUssd() {
-  const t = document.getElementById('prev-ussd').textContent;
-  navigator.clipboard.writeText(t).then(() => showToast('USSD code copied!'));
+  if (!lastPayload) return;
+  navigator.clipboard.writeText(lastPayload.ussd).then(() => {
+    showToast("USSD String Copied!");
+  });
 }
 
-/* ── TOAST ─────────────────────────────────────── */
+/* ── INTERACTIVE TOAST ELEMENT ──────────────────── */
 function showToast(msg) {
-  const t = document.getElementById('toast');
+  const toast = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-/* ── PNG DOWNLOAD ──────────────────────────────── */
+/* ── PDF / GRAPHICS RENDERING DRIVERS ───────────── */
 function downloadPNG() {
-  if (!qrDataUrl) return showToast('Generate a QR code first');
-  const a = document.createElement('a');
-  a.href = qrDataUrl;
-  a.download = `qrpay_${(lastPayload.name||'payment').replace(/\s+/g,'_')}.png`;
-  a.click();
+  const canvas = document.querySelector('#qr-target canvas');
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.download = `payment-qr-${lastPayload.targetNumber}.png`;
+  link.href = canvas.toDataURL();
+  link.click();
 }
 
-/* ── PDF DOWNLOAD ──────────────────────────────── */
 function downloadPDF() {
-  if (!lastPayload) return showToast('Generate a QR code first');
-  const imgEl = document.querySelector('#qr-target canvas') || document.querySelector('#qr-target img');
-  let dataUrl = qrDataUrl;
-  if (!dataUrl && imgEl && imgEl.tagName === 'CANVAS') dataUrl = imgEl.toDataURL('image/png');
-  if (!dataUrl && imgEl && imgEl.tagName === 'IMG') dataUrl = imgEl.src;
-  if (!dataUrl) return showToast('QR image not ready, please wait a moment');
+  const { window } = window.jspdf;
+  const doc = new window.jspdf.jsPDF({
+    orientation: 'p',
+    unit: 'mm',
+    format: 'a4'
+  });
 
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const pw = doc.internal.pageSize.getWidth();
-  const ph = doc.internal.pageSize.getHeight();
-  const p = lastPayload;
-  const isEVC = p.brand === 'evc';
-
-  // Background
-  doc.setFillColor(10, 15, 30);
-  doc.rect(0, 0, pw, ph, 'F');
-
-  // Accent stripe
-  const ac = isEVC ? [0,200,150] : [255,107,53];
-  doc.setFillColor(ac[0], ac[1], ac[2]);
-  doc.rect(0, 0, 6, ph, 'F');
-
-  // White content area
-  doc.setFillColor(248, 250, 255);
-  doc.roundedRect(14, 20, pw - 28, ph - 40, 6, 6, 'F');
-
-  // Brand tag
-  doc.setFillColor(ac[0], ac[1], ac[2]);
-  doc.roundedRect(pw/2 - 34, 26, 68, 11, 4, 4, 'F');
-  doc.setTextColor(10, 15, 30);
-  doc.setFont('helvetica','bold'); doc.setFontSize(8);
-  doc.text(isEVC ? 'Fadhlan Iska Hubi' : 'Fadhlan Iska Hubi', pw/2, 33.2, { align:'center' });
-
-  // Name
-  doc.setTextColor(10, 15, 30);
-  doc.setFont('helvetica','bold'); doc.setFontSize(28);
-  doc.text(p.name || (isEVC ? 'EVC Plus Payment' : 'eDahab Payment'), pw/2, 55, { align:'center' });
-
-  // Phone
-  doc.setFont('helvetica','normal'); doc.setFontSize(28);
-  doc.setTextColor(100, 116, 139);
-  const fmtP = `+252 ${p.phone.slice(0,3)} ${p.phone.slice(3,6)} ${p.phone.slice(6)}`;
-  doc.text(fmtP, pw/2, 64, { align:'center' });
-
-  // Divider
+  const accentColor = brand === 'evc' ? [0, 200, 150] : [255, 107, 53];
+  
+  // Outer frame borders
   doc.setDrawColor(226, 232, 240);
-  doc.setLineWidth(0.4);
-  doc.line(24, 70, pw - 24, 70);
-
-  // Amount
-  doc.setFont('helvetica','bold'); doc.setFontSize(42);
-  doc.setTextColor(ac[0], ac[1], ac[2]);
-  doc.text(`$${p.amount}`, pw/2, 90, { align:'center' });
-  doc.setFont('helvetica','normal'); doc.setFontSize(10);
-  doc.setTextColor(148, 163, 184);
-  doc.text('PAYMENT AMOUNT (USD)', pw/2, 97, { align:'center' });
-
-  // QR code
-  const qrSize = 100;
-  const qrX = (pw - qrSize) / 2;
-  doc.addImage(dataUrl, 'PNG', qrX, 105, qrSize, qrSize);
-
-  // QR frame hint
-  doc.setDrawColor(ac[0], ac[1], ac[2]);
   doc.setLineWidth(0.5);
-  doc.roundedRect(qrX - 3, 102, qrSize + 6, qrSize + 6, 4, 4);
+  doc.rect(15, 15, 180, 267);
 
-  // USSD code
-  doc.setFont('courier','normal'); doc.setFontSize(9);
-  doc.setTextColor(100, 116, 139);
-  doc.text(p.ussd, pw/2, 215, { align:'center' });
+  // Background Header layout geometry
+  doc.setFillColor(10, 15, 30);
+  doc.rect(15, 15, 180, 45, 'F');
 
-  // Footer
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
-  doc.setTextColor(71, 85, 105);
-  doc.text('Generated by QR Pay — qrpay.so • No personal data stored • Privacy first', pw/2, 266, { align:'center' });
+  // Header Context Labels
+  doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(14);
+  let modeTitleString = brand === 'evc' ? 'EVC PLUS MOBILE PAY' : 'EDAHAB MOBILE PAY';
+  if(lastPayload.mode === 'merchant') modeTitleString = brand === 'evc' ? 'EVC MERCHANT PAY' : 'EDAHAB MERCHANT PAY';
+  if(lastPayload.mode === 'pay-open') modeTitleString = brand === 'evc' ? 'EVC OPEN AMOUNT' : 'EDAHAB OPEN AMOUNT';
+  
+  doc.text(modeTitleString, 105, 30, { align: 'center' });
 
-  const fn = `qrpay_${(p.name||p.brand).replace(/\s+/g,'_')}_${p.amount}.pdf`;
-  doc.save(fn);
-  showToast('PDF downloaded!');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  const accountName = lastPayload.name || (lastPayload.mode === 'merchant' ? 'Merchant Account' : 'Payee Client');
+  doc.text(accountName, 105, 42, { align: 'center' });
+
+  doc.setFontSize(14);
+  doc.setTextColor(148, 163, 184);
+  const secondaryLabel = (lastPayload.mode === 'merchant' ? 'Merchant ID: ' : 'Phone: +252 ') + lastPayload.targetNumber;
+  doc.text(secondaryLabel, 105, 51, { align: 'center' });
+
+  // Draw standard image vectors safely onto target canvas geometry
+  const qrCanvas = document.querySelector('#qr-target canvas');
+  if (qrCanvas) {
+    const qrData = qrCanvas.toDataURL('image/jpeg', 1.0);
+    doc.rect(55, 80, 100, 100);
+    doc.addImage(qrData, 'JPEG', 57, 82, 96, 96);
+  }
+
+  // Value rendering block base alignment
+  if (lastPayload.mode !== 'pay-open') {
+    doc.setTextColor(10, 15, 30);
+    doc.setFontSize(14);
+    doc.text('AMOUNT', 105, 202, { align: 'center' });
+    doc.setFontSize(38);
+    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+    doc.text(`$${lastPayload.amount} USD`, 105, 216, { align: 'center' });
+  } else {
+    doc.setTextColor(10, 15, 30);
+    doc.setFontSize(22);
+    doc.text('SCAN TO ENTER AMOUNT', 105, 210, { align: 'center' });
+  }
+
+  // System instructional boxes
+  doc.setFillColor(248, 250, 255);
+  doc.rect(25, 232, 160, 22, 'F');
+  doc.setDrawColor(accentColor[0], accentColor[1], accentColor[2]);
+  doc.rect(25, 232, 160, 22);
+
+  doc.setTextColor(10, 15, 30);
+  doc.setFontSize(11);
+  doc.setFont('Helvetica', 'bold');
+  doc.text('USSD Code String:', 30, 241);
+  doc.setFont('Helvetica', 'normal');
+  doc.setFontSize(12);
+  doc.text(lastPayload.ussd, 30, 248);
+
+  // Bottom parameters layout footer text
+  doc.setTextColor(148, 163, 184);
+  doc.setFontSize(10);
+  doc.text('Scan this QR code using your Smartphone camera lens to launch your phone terminal.', 105, 274, { align: 'center' });
+
+  doc.save(`payment-qr-${lastPayload.targetNumber}.pdf`);
 }
 
-/* ── VISITOR COUNT ─────────────────────────────── */
-async function loadVisitors() {
+/* ── REAL VISITOR COUNTER ───────────────────────── */
+async function loadVisitorCount() {
   try {
-    let count = 0;
-    try {
-      const r = await window.storage.get('qrpay_visitors_v2', true);
-      count = r ? (parseInt(r.value) || 0) : 0;
-    } catch(e) { count = 0; }
-    count++;
-    await window.storage.set('qrpay_visitors_v2', String(count), true);
-    document.getElementById('visitor-num').textContent = count.toLocaleString();
-  } catch(e) {
-    document.getElementById('visitor-text').textContent = 'Visitor counter';
+    const response = await fetch(
+      'https://api.countapi.xyz/hit/qrpay-so/visits'
+    );
+
+    const data = await response.json();
+
+    document.getElementById('visitor-num').textContent =
+      data.value.toLocaleString();
+  } catch (error) {
+    console.error('Visitor counter error:', error);
+    document.getElementById('visitor-num').textContent = 'N/A';
   }
 }
-
-loadVisitors();
 </script>
 </body>
 </html>

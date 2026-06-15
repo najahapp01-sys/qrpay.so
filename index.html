@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Pay — Somalia QR Payment Generator</title>
+<meta name="description" content="Generate printable EVC Plus and eDahab payment QR codes instantly. No tracking. No data stored.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --ink:        #0A0F1E;
+  --ink-2:      #1C2333;
+  --ink-3:      #2E3650;
+  --muted:      #64748B;
+  --muted-2:    #94A3B8;
+  --line:       #E2E8F0;
+  --surface:    #F8FAFF;
+  --white:      #FFFFFF;
+
+  --evc:        #00C896;
+  --evc-dark:   #00A37A;
+  --evc-glow:   rgba(0,200,150,0.18);
+  --evc-subtle: #E6FBF5;
+
+  --edahab:      #FF6B35;
+  --edahab-dark: #E55420;
+  --edahab-glow: rgba(255,107,53,0.18);
+  --edahab-subtle: #FFF1EC;
+
+  --accent: var(--evc);
+  --accent-dark: var(--evc-dark);
+  --accent-glow: var(--evc-glow);
+  --accent-subtle: var(--evc-subtle);
+
+  --radius-sm: 8px;
+  --radius:    14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── PAGE LAYOUT ─────────────────────────────────── */
+.page-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── NAV ─────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(248,250,255,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  padding: 0 24px;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo {
+  width: 32px; height: 32px;
+  background: var(--ink);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-logo svg { width: 17px; height: 17px; }
+.nav-title {
+  font-size: 15px; font-weight: 700; letter-spacing: -0.3px;
+  color: var(--ink);
+}
+.nav-badge {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+  background: var(--accent-subtle);
+  color: var(--accent-dark);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  transition: background 0.3s, color 0.3s;
+}
+.nav-right {
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-pill {
+  font-size: 11px; font-weight: 500;
+  color: var(--muted);
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  display: flex; align-items: center; gap: 5px;
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #22C55E;
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── HERO ─────────────────────────────────────────── */
+.hero {
+  padding: 56px 24px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, var(--accent-glow), transparent 70%);
+  pointer-events: none;
+  transition: background 0.4s;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 16px;
+  transition: color 0.3s;
+}
+.hero-eyebrow-line { width: 28px; height: 1.5px; background: var(--accent); border-radius: 2px; transition: background 0.3s; }
+.hero h1 {
+  font-size: clamp(30px, 5vw, 48px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+  transition: color 0.3s;
+}
+.hero-sub {
+  font-size: 16px; color: var(--muted);
+  max-width: 420px; margin: 0 auto 36px;
+  line-height: 1.6; font-weight: 400;
+}
+
+/* ── BRAND SWITCHER ──────────────────────────────── */
+.switcher-wrap {
+  display: flex; justify-content: center; margin-bottom: 40px;
+}
+.switcher {
+  display: inline-flex;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  padding: 4px;
+  gap: 4px;
+  box-shadow: 0 2px 12px rgba(10,15,30,0.07);
+}
+.sw-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 22px;
+  border: none; cursor: pointer;
+  border-radius: 22px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+}
+.sw-btn svg { width: 18px; height: 18px; transition: all 0.25s; }
+.sw-btn.active {
+  color: white;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.sw-btn.active.evc { background: var(--evc); }
+.sw-btn.active.edahab { background: var(--edahab); }
+.sw-btn:not(.active):hover { color: var(--ink); background: var(--surface); }
+
+/* ── MAIN GRID ───────────────────────────────────── */
+.main {
+  flex: 1;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 700px) {
+  .main { grid-template-columns: 1fr; }
+}
+
+/* ── CARDS ───────────────────────────────────────── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.card-header {
+  padding: 20px 24px 0;
+  display: flex; align-items: center; gap: 10px;
+}
+.card-icon {
+  width: 36px; height: 36px;
+  background: var(--accent-subtle);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.3s;
+}
+.card-icon svg { width: 18px; height: 18px; color: var(--accent); transition: color 0.3s; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+.card-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.card-body { padding: 20px 24px 24px; }
+
+/* ── FORM FIELDS ─────────────────────────────────── */
+.field { margin-bottom: 20px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.field-label .req { color: var(--accent); font-size: 14px; transition: color 0.3s; }
+.input-wrap { position: relative; }
+.input-wrap svg.input-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 17px; height: 17px; color: var(--muted-2); pointer-events: none;
+}
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px; font-weight: 400;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  outline: none;
+  transition: all 0.2s;
+  -webkit-appearance: none;
+}
+input[type="text"]:focus,
+input[type="number"]:focus {
+  border-color: var(--accent);
+  background: var(--white);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+input::placeholder { color: var(--muted-2); font-weight: 400; }
+.field-error {
+  font-size: 12px; color: #EF4444;
+  margin-top: 6px; display: none;
+  align-items: center; gap: 5px;
+}
+.field-error.show { display: flex; }
+.field-error svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* phone prefix */
+.phone-prefix {
+  position: absolute; left: 42px; top: 50%; transform: translateY(-50%);
+  font-size: 15px; color: var(--muted); font-weight: 500; pointer-events: none;
+  padding-right: 6px;
+  border-right: 1.5px solid var(--line);
+}
+.phone-input-padded { padding-left: 86px !important; }
+
+/* ── AMOUNT PRESETS ──────────────────────────────── */
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.preset {
+  padding: 10px 4px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.18s;
+}
+.preset:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-subtle); }
+.preset.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 3px 10px var(--accent-glow);
+}
+.preset.other { grid-column: span 2; }
+.custom-input-wrap { display: none; margin-top: 8px; }
+.custom-input-wrap.show { display: block; }
+
+/* ── GENERATE BUTTON ─────────────────────────────── */
+.gen-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px var(--accent-glow);
+  margin-top: 4px;
+  letter-spacing: -0.2px;
+}
+.gen-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px var(--accent-glow); }
+.gen-btn:active { transform: translateY(0); }
+.gen-btn svg { width: 18px; height: 18px; }
+
+/* ── PREVIEW CARD ────────────────────────────────── */
+.preview-card { display: none; }
+.preview-card.show { display: block; }
+
+.preview-top {
+  padding: 24px;
+  background: var(--ink);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.preview-top::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 80px;
+  background: var(--accent);
+  filter: blur(40px);
+  opacity: 0.35;
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+.preview-brand-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 18px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 3px 12px;
+  margin-bottom: 12px;
+  position: relative; z-index: 1;
+  transition: color 0.3s, border-color 0.3s;
+}
+.preview-person-name {
+  font-size: 32px; font-weight: 800; letter-spacing: -0.5px;
+  color: white;
+  position: relative; z-index: 1;
+  margin-bottom: 4px;
+}
+.preview-phone {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px; color: rgba(255,255,255,0.5);
+  position: relative; z-index: 1;
+}
+
+.qr-section {
+  padding: 28px 24px;
+  display: flex; flex-direction: column; align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.qr-frame {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 24px rgba(10,15,30,0.08);
+}
+#qr-target canvas, #qr-target img { display: block; border-radius: 4px; }
+
+.amount-row {
+  display: flex; align-items: baseline; gap: 6px;
+}
+.amount-currency { font-size: 22px; font-weight: 700; color: var(--muted); }
+.amount-value {
+  font-size: 48px; font-weight: 800;
+  letter-spacing: -2px; line-height: 1;
+  color: var(--accent);
+  transition: color 0.3s;
+}
+.amount-cents { font-size: 26px; font-weight: 700; color: var(--accent); transition: color 0.3s; }
+.amount-label { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px; letter-spacing: 0.3px; }
+
+.ussd-row {
+  margin-top: 16px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  width: 100%;
+}
+.ussd-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--muted);
+  flex: 1; word-break: break-all;
+}
+.copy-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted-2); padding: 0;
+  display: flex; align-items: center;
+  transition: color 0.2s;
+}
+.copy-btn:hover { color: var(--accent); }
+.copy-btn svg { width: 15px; height: 15px; }
+
+/* ── ACTION BUTTONS ──────────────────────────────── */
+.actions { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 10px; }
+.action-btn {
+  width: 100%; padding: 13px 16px;
+  border: none; border-radius: var(--radius);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s;
+}
+.action-btn svg { width: 17px; height: 17px; }
+.action-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.action-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
+.action-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+}
+.action-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── HOW TO PAY ──────────────────────────────────── */
+.how-card {
+  background: var(--ink-2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  color: white;
+}
+.how-card-title {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.5px; color: rgba(255,255,255,0.5);
+  text-transform: uppercase; margin-bottom: 18px;
+}
+.how-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin-bottom: 18px;
+}
+.how-step:last-child { margin-bottom: 0; }
+.step-dot {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: white;
+  box-shadow: 0 0 0 4px var(--accent-glow);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.step-content { padding-top: 5px; }
+.step-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 2px; }
+.step-desc { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+/* ── FOOTER ──────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--line);
+  padding: 24px;
+  text-align: center;
+  background: var(--white);
+}
+.visitor-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 12px;
+}
+.visitor-count-num { font-weight: 700; color: var(--ink); }
+.footer-links {
+  display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.footer-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--muted-2); font-weight: 500;
+}
+.footer-badge svg { width: 13px; height: 13px; }
+.footer-copy { font-size: 11px; color: var(--muted-2); }
+
+/* ── TOAST ───────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--ink);
+  color: white;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 28px rgba(10,15,30,0.25);
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast svg { width: 16px; height: 16px; color: var(--accent); transition: color 0.3s; }
+
+/* ── TRANSITIONS ─────────────────────────────────── */
+.accent-transition {
+  transition: color 0.3s, background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="2.5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="nav-title">QR Pay.so</div>
+    </div>
+    
+  </div>
+  <div class="nav-right">
+    <div class="nav-pill">
+      <span class="live-dot"></span> Secure &amp; Private
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">
+    <span class="hero-eyebrow-line" id="eyebrow-line"></span>
+    Mobile Payment QR
+    <span class="hero-eyebrow-line" id="eyebrow-line-r"></span>
+  </div>
+  <h1>Generate your<br><em id="hero-em">EVC Plus</em> payment<br>QR in seconds</h1>
+  <p class="hero-sub">Shops, mosques, NGOs, and freelancers — print and display. Customers scan and pay instantly. No app needed.</p>
+
+  <!-- BRAND SWITCHER -->
+  <div class="switcher-wrap">
+    <div class="switcher">
+      <button class="sw-btn evc active" id="sw-evc" onclick="switchBrand('evc')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+        EVC Plus
+      </button>
+      <button class="sw-btn edahab" id="sw-edahab" onclick="switchBrand('edahab')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>
+        eDahab
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<main class="main">
+
+  <!-- LEFT: FORM -->
+  <div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" id="form-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Payment details</div>
+          <div class="card-sub">Xogtada gali formkaan si aad QR udabacatid</div>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <!-- Name -->
+        <div class="field">
+          <div class="field-label">Gali Magaca <span style="font-size:11px;color:var(--muted-2);text-transform:none;font-weight:400;letter-spacing:0">(optional)</span></div>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="inp-name" placeholder="e.g. Ahmed Farah, Shop, Al-Nuur Masjid..." maxlength="60">
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="field">
+          <div class="field-label" id="phone-label">
+            EVC number <span class="req">*</span>
+          </div>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.4 2 2 0 0 1 3 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span class="phone-prefix">+252</span>
+            <input type="text" id="inp-phone" class="phone-input-padded" placeholder="61 5 009900" maxlength="12" inputmode="numeric">
+          </div>
+          <div class="field-error" id="err-phone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Enter a valid Somali number (9–12 digits, numbers only)
+          </div>
+        </div>
+
+        <!-- Amount -->
+        <div class="field">
+          <div class="field-label">Amount (USD) <span class="req">*</span></div>
+          <div class="presets-grid">
+            <button class="preset active" onclick="selectPreset(this,'0.10')">$0.10</button>
+            <button class="preset" onclick="selectPreset(this,'0.25')">$0.25</button>
+            <button class="preset" onclick="selectPreset(this,'0.50')">$0.50</button>
+            <button class="preset" onclick="selectPreset(this,'0.75')">$0.75</button>
+            
+            <button class="preset other" onclick="selectCustom(this)">Other amount…</button>
+          </div>
+          <div class="custom-input-wrap" id="custom-wrap">
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <input type="number" id="inp-custom" placeholder="Enter USD amount" min="0.01" step="0.01">
+            </div>
+            <div class="field-error" id="err-amount">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Enter a valid amount greater than 0
+            </div>
+          </div>
+        </div>
+
+        <button class="gen-btn" id="gen-btn" onclick="generate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+          Generate QR code
+        </button>
+
+      </div>
+    </div>
+
+    <!-- HOW TO PAY -->
+    <div class="how-card" style="margin-top: 20px;">
+      <div class="how-card-title">How it works</div>
+      <div class="how-step">
+        <div class="step-dot" id="step1">1</div>
+        <div class="step-content">
+          <div class="step-title">Print &amp; display</div>
+          <div class="step-desc">Download the PDF and print it. Place it on your counter, donation box, or wall.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="step-dot" id="step2">2</div>
+        <div class="step-content">
+          <div class="step-title">Customer scans</div>
+          <div class="step-desc">They point their phone camera at the QR code. The dialer opens instantly.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="step-dot" id="step3">3</div>
+        <div class="step-content">
+          <div class="step-title">Payment complete</div>
+          <div class="step-desc" id="step3-desc">They press Call and enter their EVC PIN. Payment done.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: PREVIEW -->
+  <div>
+    <!-- Empty state -->
+    <div class="card" id="empty-state">
+      <div style="padding: 60px 24px; text-align: center;">
+        <div style="width:72px;height:72px;background:var(--surface);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--muted-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+        </div>
+        <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;">Your QR appears here</p>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Fill in your payment details on the left<br>and click Generate QR code.</p>
+      </div>
+    </div>
+
+    <!-- Preview (hidden until generated) -->
+    <div class="card preview-card" id="preview-card">
+      <div class="preview-top">
+        <div class="preview-brand-tag" id="prev-brand-tag">Fadhlan Iska Hubi</div>
+        <div class="preview-person-name" id="prev-name">–</div>
+        <div class="preview-phone" id="prev-phone">+252 –</div>
+      </div>
+      <div class="qr-section">
+        <div class="qr-frame">
+          <div id="qr-target"></div>
+        </div>
+        <div class="amount-row">
+          <span class="amount-currency">USD</span>
+          <span class="amount-value" id="prev-amount-whole">0</span>
+          <span class="amount-cents" id="prev-amount-cents">.00</span>
+        </div>
+        <div class="amount-label">Payment amount</div>
+        <div class="ussd-row">
+          <span class="ussd-code" id="prev-ussd">–</span>
+          <button class="copy-btn" onclick="copyUssd()" title="Copy USSD code">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="action-btn action-primary" id="dl-pdf-btn" onclick="downloadPDF()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF (print-ready)
+        </button>
+        <button class="action-btn action-secondary" onclick="downloadPNG()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Save as PNG image
+        </button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="visitor-chip">
+    <span class="live-dot"></span>
+    <span id="visitor-text"><span class="visitor-count-num" id="visitor-num">–</span> total visitors</span>
+  </div>
+  <div class="footer-links">
+    <div class="footer-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      No data stored
+    </div>
+    <div class="footer-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Zero tracking
+    </div>
+    <div class="footer-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Privacy first
+    </div>
+  </div>
+  <div class="footer-copy">QR Pay Generator &copy; 2025 &mdash; Somalia mobile payments made simple</div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toast-msg">Copied!</span>
+</div>
+
+<script>
+/* ── STATE ─────────────────────────────────────── */
+let brand = 'evc';
+let presetVal = '0.10';
+let isCustom = false;
+let qrDataUrl = null;
+let lastPayload = null;
+
+/* ── BRAND SWITCH ──────────────────────────────── */
+function switchBrand(b) {
+  brand = b;
+  const isEVC = b === 'evc';
+
+  // CSS vars
+  document.documentElement.style.setProperty('--accent',        isEVC ? 'var(--evc)'        : 'var(--edahab)');
+  document.documentElement.style.setProperty('--accent-dark',   isEVC ? 'var(--evc-dark)'   : 'var(--edahab-dark)');
+  document.documentElement.style.setProperty('--accent-glow',   isEVC ? 'var(--evc-glow)'   : 'var(--edahab-glow)');
+  document.documentElement.style.setProperty('--accent-subtle', isEVC ? 'var(--evc-subtle)'  : 'var(--edahab-subtle)');
+
+  // switcher buttons
+  document.getElementById('sw-evc').className    = 'sw-btn evc'    + (isEVC ? ' active' : '');
+  document.getElementById('sw-edahab').className = 'sw-btn edahab' + (!isEVC ? ' active' : '');
+
+  // labels
+  document.getElementById('phone-label').innerHTML = (isEVC ? 'EVC number' : 'eDahab number') + ' <span class="req">*</span>';
+  document.getElementById('inp-phone').placeholder = isEVC ? '61 5 009900' : '62 5 009900';
+  document.getElementById('hero-em').textContent = isEVC ? 'EVC Plus' : 'eDahab';
+  document.getElementById('step3-desc').textContent = `They press Call and enter their ${isEVC ? 'EVC' : 'eDahab'} PIN. Payment done.`;
+}
+
+/* ── AMOUNT ────────────────────────────────────── */
+function selectPreset(el, val) {
+  isCustom = false; presetVal = val;
+  document.getElementById('custom-wrap').className = 'custom-input-wrap';
+  document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+function selectCustom(el) {
+  isCustom = true; presetVal = '';
+  document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('custom-wrap').className = 'custom-input-wrap show';
+  document.getElementById('inp-custom').focus();
+}
+function getAmount() {
+  if (isCustom) {
+    const v = parseFloat(document.getElementById('inp-custom').value);
+    return (isNaN(v) || v <= 0) ? null : v;
+  }
+  return parseFloat(presetVal);
+}
+
+/* ── SANITIZE ──────────────────────────────────── */
+function sanitize(s) {
+  return s.replace(/[<>"'`&;]/g, '').trim();
+}
+
+/* ── GENERATE ──────────────────────────────────── */
+function generate() {
+  const rawPhone = document.getElementById('inp-phone').value.trim().replace(/\D/g,'');
+  const amount   = getAmount();
+  const name     = sanitize(document.getElementById('inp-name').value || '');
+
+  let valid = true;
+  document.getElementById('err-phone').classList.remove('show');
+  document.getElementById('err-amount').classList.remove('show');
+
+  if (!/^[0-9]{9,12}$/.test(rawPhone)) {
+    document.getElementById('err-phone').classList.add('show'); valid = false;
+  }
+  if (!amount) {
+    document.getElementById('err-amount').classList.add('show'); valid = false;
+  }
+  if (!valid) return;
+
+  const amtStr = amount.toFixed(2);
+  const [whole, cents] = amtStr.split('.');
+  const isEVC = brand === 'evc';
+  const ussdCode = isEVC ? `*712*${rawPhone}*${amtStr}#` : `*862*${rawPhone}*${amtStr}#`;
+  const telUri   = `tel:${encodeURIComponent(ussdCode)}`;
+
+  lastPayload = { name, phone: rawPhone, amount: amtStr, ussd: ussdCode, brand };
+
+  // Update preview header
+  document.getElementById('prev-brand-tag').textContent = isEVC ? 'EVC Plus Payment' : 'eDahab Payment';
+  document.getElementById('prev-name').textContent  = name || (isEVC ? 'EVC Payment' : 'eDahab Payment');
+  const fmt = rawPhone.length >= 9
+    ? `+252 ${rawPhone.slice(0,3)} ${rawPhone.slice(3,6)} ${rawPhone.slice(6)}`
+    : `+252 ${rawPhone}`;
+  document.getElementById('prev-phone').textContent      = fmt;
+  document.getElementById('prev-amount-whole').textContent = whole;
+  document.getElementById('prev-amount-cents').textContent = '.' + cents;
+  document.getElementById('prev-ussd').textContent = ussdCode;
+
+  // Show preview
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('preview-card').className = 'card preview-card show';
+
+  // Generate QR
+  const target = document.getElementById('qr-target');
+  target.innerHTML = '';
+  new QRCode(target, {
+    text: telUri,
+    width: 200, height: 200,
+    colorDark: '#0A0F1E',
+    colorLight: '#FFFFFF',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  setTimeout(() => {
+    const img = target.querySelector('img') || target.querySelector('canvas');
+    if (img) {
+      if (img.tagName === 'CANVAS') {
+        qrDataUrl = img.toDataURL('image/png');
+      } else {
+        qrDataUrl = img.src;
+      }
+    }
+  }, 200);
+
+  document.getElementById('preview-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  showToast('QR code generated!');
+}
+
+/* ── COPY USSD ─────────────────────────────────── */
+function copyUssd() {
+  const t = document.getElementById('prev-ussd').textContent;
+  navigator.clipboard.writeText(t).then(() => showToast('USSD code copied!'));
+}
+
+/* ── TOAST ─────────────────────────────────────── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ── PNG DOWNLOAD ──────────────────────────────── */
+function downloadPNG() {
+  if (!qrDataUrl) return showToast('Generate a QR code first');
+  const a = document.createElement('a');
+  a.href = qrDataUrl;
+  a.download = `qrpay_${(lastPayload.name||'payment').replace(/\s+/g,'_')}.png`;
+  a.click();
+}
+
+/* ── PDF DOWNLOAD ──────────────────────────────── */
+function downloadPDF() {
+  if (!lastPayload) return showToast('Generate a QR code first');
+  const imgEl = document.querySelector('#qr-target canvas') || document.querySelector('#qr-target img');
+  let dataUrl = qrDataUrl;
+  if (!dataUrl && imgEl && imgEl.tagName === 'CANVAS') dataUrl = imgEl.toDataURL('image/png');
+  if (!dataUrl && imgEl && imgEl.tagName === 'IMG') dataUrl = imgEl.src;
+  if (!dataUrl) return showToast('QR image not ready, please wait a moment');
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pw = doc.internal.pageSize.getWidth();
+  const ph = doc.internal.pageSize.getHeight();
+  const p = lastPayload;
+  const isEVC = p.brand === 'evc';
+
+  // Background
+  doc.setFillColor(10, 15, 30);
+  doc.rect(0, 0, pw, ph, 'F');
+
+  // Accent stripe
+  const ac = isEVC ? [0,200,150] : [255,107,53];
+  doc.setFillColor(ac[0], ac[1], ac[2]);
+  doc.rect(0, 0, 6, ph, 'F');
+
+  // White content area
+  doc.setFillColor(248, 250, 255);
+  doc.roundedRect(14, 20, pw - 28, ph - 40, 6, 6, 'F');
+
+  // Brand tag
+  doc.setFillColor(ac[0], ac[1], ac[2]);
+  doc.roundedRect(pw/2 - 34, 26, 68, 11, 4, 4, 'F');
+  doc.setTextColor(10, 15, 30);
+  doc.setFont('helvetica','bold'); doc.setFontSize(8);
+  doc.text(isEVC ? 'Fadhlan Iska Hubi' : 'Fadhlan Iska Hubi', pw/2, 33.2, { align:'center' });
+
+  // Name
+  doc.setTextColor(10, 15, 30);
+  doc.setFont('helvetica','bold'); doc.setFontSize(28);
+  doc.text(p.name || (isEVC ? 'EVC Plus Payment' : 'eDahab Payment'), pw/2, 55, { align:'center' });
+
+  // Phone
+  doc.setFont('helvetica','normal'); doc.setFontSize(28);
+  doc.setTextColor(100, 116, 139);
+  const fmtP = `+252 ${p.phone.slice(0,3)} ${p.phone.slice(3,6)} ${p.phone.slice(6)}`;
+  doc.text(fmtP, pw/2, 64, { align:'center' });
+
+  // Divider
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.4);
+  doc.line(24, 70, pw - 24, 70);
+
+  // Amount
+  doc.setFont('helvetica','bold'); doc.setFontSize(42);
+  doc.setTextColor(ac[0], ac[1], ac[2]);
+  doc.text(`$${p.amount}`, pw/2, 90, { align:'center' });
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  doc.setTextColor(148, 163, 184);
+  doc.text('PAYMENT AMOUNT (USD)', pw/2, 97, { align:'center' });
+
+  // QR code
+  const qrSize = 100;
+  const qrX = (pw - qrSize) / 2;
+  doc.addImage(dataUrl, 'PNG', qrX, 105, qrSize, qrSize);
+
+  // QR frame hint
+  doc.setDrawColor(ac[0], ac[1], ac[2]);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(qrX - 3, 102, qrSize + 6, qrSize + 6, 4, 4);
+
+  // USSD code
+  doc.setFont('courier','normal'); doc.setFontSize(9);
+  doc.setTextColor(100, 116, 139);
+  doc.text(p.ussd, pw/2, 215, { align:'center' });
+
+  // Footer
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+  doc.setTextColor(71, 85, 105);
+  doc.text('Generated by QR Pay — qrpay.so • No personal data stored • Privacy first', pw/2, 266, { align:'center' });
+
+  const fn = `qrpay_${(p.name||p.brand).replace(/\s+/g,'_')}_${p.amount}.pdf`;
+  doc.save(fn);
+  showToast('PDF downloaded!');
+}
+
+/* ── VISITOR COUNT ─────────────────────────────── */
+async function loadVisitors() {
+  try {
+    let count = 0;
+    try {
+      const r = await window.storage.get('qrpay_visitors_v2', true);
+      count = r ? (parseInt(r.value) || 0) : 0;
+    } catch(e) { count = 0; }
+    count++;
+    await window.storage.set('qrpay_visitors_v2', String(count), true);
+    document.getElementById('visitor-num').textContent = count.toLocaleString();
+  } catch(e) {
+    document.getElementById('visitor-text').textContent = 'Visitor counter';
+  }
+}
+
+loadVisitors();
+</script>
+</body>
+</html>

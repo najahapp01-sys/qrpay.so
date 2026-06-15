@@ -521,9 +521,6 @@ footer {
 }
 .visitor-chip {
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 20px;
   padding: 8px 18px;
   font-size: 13px; color: var(--muted);
   margin-bottom: 12px;
@@ -758,9 +755,11 @@ footer {
 
 <footer>
   <div class="visitor-chip">
-    <span class="live-dot"></span>
-    <span id="visitor-text"><span class="visitor-count-num" id="visitor-num">Loading...</span> total visitors</span>
-  </div>
+  <img
+    src="https://visitor-badge.laobi.icu/badge?page_id=qrpay.so"
+    alt="Visitor Count"
+    >
+</div>
   <div class="footer-links">
     <div class="footer-badge">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
